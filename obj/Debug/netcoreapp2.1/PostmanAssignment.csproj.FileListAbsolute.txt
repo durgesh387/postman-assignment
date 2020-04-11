@@ -1,0 +1,4 @@
+/Users/naveenchandra/Desktop/TrialProjects/PostmanAssignment/obj/Debug/netcoreapp2.1/PostmanAssignment.csprojAssemblyReference.cache
+/Users/naveenchandra/Desktop/TrialProjects/PostmanAssignment/obj/Debug/netcoreapp2.1/PostmanAssignment.csproj.CoreCompileInputs.cache
+/Users/naveenchandra/Desktop/TrialProjects/PostmanAssignment/obj/Debug/netcoreapp2.1/PostmanAssignment.AssemblyInfoInputs.cache
+/Users/naveenchandra/Desktop/TrialProjects/PostmanAssignment/obj/Debug/netcoreapp2.1/PostmanAssignment.AssemblyInfo.cs
