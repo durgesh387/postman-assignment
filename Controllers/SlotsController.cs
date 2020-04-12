@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using PostmanAssignment.Entities;
 using PostmanAssignment.Services;
 using PostmanAssignment.QueryModels;
-using PostmanAssignment.Commands;
 using PostmanAssignment.Exceptions;
 
 namespace PostmanAssignment.Controllers
@@ -31,8 +30,8 @@ namespace PostmanAssignment.Controllers
         {
             try
             {
-                var newSlot = await _slotService.CreateAsync(slot);
-                return CreatedAtRoute("SlotLink", newSlot.Id, newSlot);
+                //var newSlot = ;
+                return Ok(await _slotService.CreateAsync(slot));
             }
             catch (InvalidArgumentException ex)
             {
@@ -40,8 +39,8 @@ namespace PostmanAssignment.Controllers
             }
         }
 
-        [HttpGet("{id}", Name = "SlotLink")]
-        public async Task<ActionResult<Slot>> GetAsync(Guid id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Slot>> GetAsync(string id)
         {
             try
             {

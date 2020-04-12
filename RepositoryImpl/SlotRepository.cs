@@ -8,7 +8,6 @@ using PostmanAssignment.Repositories;
 using PostmanAssignment.QueryModels;
 using PostmanAssignment.Utilities;
 using System.Data.Common;
-using PostmanAssignment.Commands;
 using Microsoft.Extensions.Options;
 
 namespace PostmanAssignment.RepositoryImpl
@@ -20,7 +19,7 @@ namespace PostmanAssignment.RepositoryImpl
         {
             _appSettings = appSettings.Value;
         }
-        public async Task<Guid> CreateAsync(Slot slot)
+        public async Task<string> CreateAsync(Slot slot)
         {
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             using (MySqlConnection connection = new MySqlConnection(_appSettings.ConnectionString))
@@ -32,8 +31,7 @@ namespace PostmanAssignment.RepositoryImpl
                     command.CommandType = CommandType.StoredProcedure;
                     command.CommandText = Routines.CreateSlot;
                     AddSlotParams(command, slot);
-                    var slotId = await command.ExecuteScalarAsync();
-                    return (Guid)(slotId);
+                    return Convert.ToString(await command.ExecuteScalarAsync());
                 }
             }
         }
@@ -42,13 +40,13 @@ namespace PostmanAssignment.RepositoryImpl
         {
             command.Parameters.AddWithValue("vId", Guid.NewGuid().ToString());
             command.Parameters.AddWithValue("vTitle", slot.Title);
-            command.Parameters.AddWithValue("vStartTime", slot.EndTime == DateTime.MinValue ? null : (DateTime?)slot.StartTime);
+            command.Parameters.AddWithValue("vStartTime", slot.StartTime == DateTime.MinValue ? null : (DateTime?)slot.StartTime);
             command.Parameters.AddWithValue("vEndTime", slot.EndTime == DateTime.MinValue ? null : (DateTime?)slot.EndTime);
             command.Parameters.AddWithValue("vScheduledBy", slot.ScheduledBy);
             command.Parameters.AddWithValue("vInviteeEmail", slot.InviteeEmail);
         }
 
-        public async Task<Slot> GetAsync(Guid id)
+        public async Task<Slot> GetAsync(string id)
         {
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             using (MySqlConnection connection = new MySqlConnection(_appSettings.ConnectionString))
@@ -75,7 +73,7 @@ namespace PostmanAssignment.RepositoryImpl
             if (await dr.ReadAsync())
             {
                 slot = new Slot();
-                slot.Id = (Guid)(dr["id"]);
+                slot.Id = Convert.ToString(dr["id"]);
                 slot.Title = Convert.ToString(dr["title"]);
                 slot.StartTime = Convert.ToDateTime(dr["start_time"]);
                 slot.EndTime = Convert.ToDateTime(dr["end_time"]);

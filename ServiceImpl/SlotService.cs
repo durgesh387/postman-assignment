@@ -8,7 +8,6 @@ using PostmanAssignment.Repositories;
 using PostmanAssignment.Services;
 using PostmanAssignment.Exceptions;
 using PostmanAssignment.QueryModels;
-using PostmanAssignment.Commands;
 
 namespace PostmanAssignment.ServiceImpl
 {
@@ -25,7 +24,7 @@ namespace PostmanAssignment.ServiceImpl
         public async Task<Slot> CreateAsync(Slot slot)
         {
             ValidateSlot(slot);
-            Guid slotId = await _slotRepository.CreateAsync(slot);
+            string slotId = await _slotRepository.CreateAsync(slot);
             return await _slotRepository.GetAsync(slotId);
         }
 
@@ -53,12 +52,12 @@ namespace PostmanAssignment.ServiceImpl
             }
         }
 
-        public async Task<Slot> GetAsync(Guid id)
+        public async Task<Slot> GetAsync(string id)
         {
             // Validation
-            if (id == Guid.Empty)
+            if (string.IsNullOrWhiteSpace(id))
             {
-                throw new InvalidArgumentException(nameof(id), id.ToString(), "non empty Guid");
+                throw new InvalidArgumentException(nameof(id), id.ToString(), "non empty id");
             }
             // Call to repository
             var slot = await _slotRepository.GetAsync(id);
