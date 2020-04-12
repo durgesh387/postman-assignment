@@ -10,7 +10,13 @@ namespace PostmanAssignment.Entities
 
         public bool Equals(Duration other)
         {
-            return StartTime == other.StartTime && EndTime == other.EndTime;
+            return this.StartTime == other.StartTime && this.EndTime == other.EndTime;
+        }
+        public override int GetHashCode()
+        {
+            int hashStartTime = this.StartTime != DateTime.MinValue ? this.StartTime.GetHashCode() : 0;
+            int hashEndTime = this.EndTime != DateTime.MinValue ? this.EndTime.GetHashCode() : 0;
+            return hashStartTime ^ hashEndTime;
         }
     }
 }
