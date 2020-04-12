@@ -8,6 +8,7 @@ using PostmanAssignment.Entities;
 using PostmanAssignment.Services;
 using PostmanAssignment.QueryModels;
 using PostmanAssignment.Commands;
+using PostmanAssignment.Exceptions;
 
 namespace PostmanAssignment.Controllers
 {
@@ -26,23 +27,48 @@ namespace PostmanAssignment.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateAsync([FromBody] SlotCreateCommand slot) 
+        public async Task<ActionResult> CreateAsync([FromBody] Slot slot)
         {
-            var newSlot = await _slotService.CreateAsync(slot);
-            return CreatedAtRoute("SlotLink", newSlot.Id, newSlot);
+            try
+            {
+                var newSlot = await _slotService.CreateAsync(slot);
+                return CreatedAtRoute("SlotLink", newSlot.Id, newSlot);
+            }
+            catch (InvalidArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("{id}", Name = "SlotLink")]
-        public async Task<ActionResult<Slot>> GetAsync(Guid id) 
+        public async Task<ActionResult<Slot>> GetAsync(Guid id)
         {
-            var slot = await _slotService.GetAsync(id);
-            return Ok(slot);
+            try
+            {
+                var slot = await _slotService.GetAsync(id);
+                return Ok(slot);
+            }
+            catch (InvalidArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (EntityNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
         [HttpPost("_search")]
         public async Task<ActionResult<IEnumerable<Duration>>> GetAvailableSlotDurationsAsync([FromBody] SlotSearchQuery query)
         {
-            return Ok(await _slotService.GetAvailableSlotDurationsAsync(query));
+            try
+            {
+                return Ok(await _slotService.GetAvailableSlotDurationsAsync(query));
+            }
+            catch (InvalidArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

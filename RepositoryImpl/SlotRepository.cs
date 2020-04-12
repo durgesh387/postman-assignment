@@ -20,7 +20,7 @@ namespace PostmanAssignment.RepositoryImpl
         {
             _appSettings = appSettings.Value;
         }
-        public async Task<Guid> CreateAsync(SlotCreateCommand slot)
+        public async Task<Guid> CreateAsync(Slot slot)
         {
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             using (MySqlConnection connection = new MySqlConnection(_appSettings.ConnectionString))
@@ -30,7 +30,7 @@ namespace PostmanAssignment.RepositoryImpl
                 {
                     command.Connection = connection;
                     command.CommandType = CommandType.StoredProcedure;
-                    command.CommandText = Routines.GetOccupiedSlotDurations;
+                    command.CommandText = Routines.CreateSlot;
                     AddSlotParams(command, slot);
                     var slotId = await command.ExecuteScalarAsync();
                     return (Guid)(slotId);
@@ -38,13 +38,13 @@ namespace PostmanAssignment.RepositoryImpl
             }
         }
 
-        private void AddSlotParams(MySqlCommand command, SlotCreateCommand slot)
+        private void AddSlotParams(MySqlCommand command, Slot slot)
         {
             command.Parameters.AddWithValue("vId", Guid.NewGuid().ToString());
             command.Parameters.AddWithValue("vTitle", slot.Title);
             command.Parameters.AddWithValue("vStartTime", slot.EndTime == DateTime.MinValue ? null : (DateTime?)slot.StartTime);
             command.Parameters.AddWithValue("vEndTime", slot.EndTime == DateTime.MinValue ? null : (DateTime?)slot.EndTime);
-            command.Parameters.AddWithValue("vCreatedBy", slot.CreatedBy);
+            command.Parameters.AddWithValue("vScheduledBy", slot.ScheduledBy);
             command.Parameters.AddWithValue("vInviteeEmail", slot.InviteeEmail);
         }
 
@@ -79,6 +79,8 @@ namespace PostmanAssignment.RepositoryImpl
                 slot.Title = Convert.ToString(dr["title"]);
                 slot.StartTime = Convert.ToDateTime(dr["start_time"]);
                 slot.EndTime = Convert.ToDateTime(dr["end_time"]);
+                slot.ScheduledBy = Convert.ToString(dr["scheduled_by"]);
+                slot.InviteeEmail = Convert.ToString(dr["invitee_email"]);
             }
             return slot;
         }
@@ -93,7 +95,7 @@ namespace PostmanAssignment.RepositoryImpl
                 {
                     command.Connection = connection;
                     command.CommandType = CommandType.StoredProcedure;
-                    command.CommandText = "v1_get_occupied_slot_durations";
+                    command.CommandText = Routines.GetOccupiedSlotDurations;
 
                     AddSlotSearchQueryParams(command, query);
 

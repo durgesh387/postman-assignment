@@ -2,7 +2,9 @@ using System;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using postman_assignment.Exceptions;
 using PostmanAssignment.Entities;
+using PostmanAssignment.Exceptions;
 using PostmanAssignment.Repositories;
 using PostmanAssignment.Services;
 
@@ -19,9 +21,26 @@ namespace PostmanAssignment.ServiceImpl
             _logger = logger;
             _repository = repository;
         }
+
+        private void ValidateAuthParams(string email, string password)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                throw new InvalidArgumentException(nameof(email), email, "valid email");
+            }
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new InvalidArgumentException(nameof(password), password, "valid password");
+            }
+        }
         public async Task<User> AuthenticateUserAsync(string email, string password)
         {
+            ValidateAuthParams(email, password);
             var user = await _repository.FindUserAsync(email);
+            if (user == null)
+            {
+                throw new EntityNotFoundException(nameof(user.Email), user.Email);
+            }
             /* Fetch the stored value */
             string savedPasswordHash = user.Password;
             /* Extract the bytes */
@@ -35,23 +54,39 @@ namespace PostmanAssignment.ServiceImpl
             /* Compare the results */
             for (int i = 0; i < 20; i++)
                 if (hashBytes[i + 16] != hash[i])
-                    return null;
-            //throw new UnauthorizedAccessException();
-
-            // return null if user not found
-            // if (user == null)
-            //     return null;
+                    throw new UnauthorizedAccessException("Password is incorrect");
             user.Password = null;
             return user;
         }
 
+        private void ValidateUser(User user)
+        {
+            if (user == null)
+            {
+                throw new InvalidArgumentException(nameof(user), null, "non null user");
+            }
+            if (string.IsNullOrWhiteSpace(user.Email))
+            {
+                throw new InvalidArgumentException(nameof(user.Email), user.Email, "valid email");
+            }
+            if (string.IsNullOrWhiteSpace(user.Password))
+            {
+                throw new InvalidArgumentException(nameof(user.Password), user.Password, "valid password");
+            }
+            if (string.IsNullOrWhiteSpace(user.FirstName))
+            {
+                throw new InvalidArgumentException(nameof(user.FirstName), null, "non null first name");
+            }
+        }
+
         public async Task<int> RegisterUserAsync(User user)
         {
+            ValidateUser(user);
             var storedUser = await _repository.FindUserAsync(user.Email);
-            // if (storedUser != null)
-            // {
-            //     return null;
-            // }
+            if (storedUser != null)
+            {
+                throw new ConflictingEntityException(nameof(user.Email), user.Email);
+            }
             byte[] salt;
             new RNGCryptoServiceProvider().GetBytes(salt = new byte[16]);
 

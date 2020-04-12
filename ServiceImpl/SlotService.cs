@@ -22,14 +22,14 @@ namespace PostmanAssignment.ServiceImpl
             _slotRepository = slotRepository;
         }
 
-        public async Task<Slot> CreateAsync(SlotCreateCommand slot)
+        public async Task<Slot> CreateAsync(Slot slot)
         {
-            ValidateCreateSlotParams(slot);
+            ValidateSlot(slot);
             Guid slotId = await _slotRepository.CreateAsync(slot);
-            return await GetAsync(slotId);
+            return await _slotRepository.GetAsync(slotId);
         }
 
-        private void ValidateCreateSlotParams(SlotCreateCommand slot)
+        private void ValidateSlot(Slot slot)
         {
             if (slot == null)
             {
@@ -44,6 +44,10 @@ namespace PostmanAssignment.ServiceImpl
                 throw new InvalidArgumentException(nameof(slot.EndTime), DateTime.MinValue.ToString(), "valid end time");
             }
             if (slot.InviteeEmail == null)
+            {
+                throw new InvalidArgumentException(nameof(slot.InviteeEmail), null, "non null invitee email");
+            }
+            if (slot.ScheduledBy == null)
             {
                 throw new InvalidArgumentException(nameof(slot.InviteeEmail), null, "non null invitee email");
             }

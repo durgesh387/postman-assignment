@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace PostmanAssignment.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/v1/[controller]")]
     public class ValuesController : ControllerBase
     {
         private readonly ILogger<ValuesController> _logger;

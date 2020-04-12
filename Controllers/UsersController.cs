@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using postman_assignment.Exceptions;
 using PostmanAssignment.Entities;
+using PostmanAssignment.Exceptions;
 using PostmanAssignment.Models;
 using PostmanAssignment.Services;
 using PostmanAssignment.Utilities;
@@ -32,32 +34,49 @@ namespace PostmanAssignment.Controllers
         [HttpPost("login")]
         public async Task<ActionResult> AuthenticateUserAsync([FromBody]AuthenticationModel model)
         {
-            var user = await _userService.AuthenticateUserAsync(model.Email, model.Password);
-            var token = GenerateToke(user.Id);
-            Response.Headers.Add("Token", token);
-            return Ok(user);
-            // if (user == null)
-            //     return BadRequest(new { message = "Username or password is incorrect" });
-
-            // return Ok(user);
+            try
+            {
+                var user = await _userService.AuthenticateUserAsync(model.Email, model.Password);
+                var token = GenerateToke(user.Id);
+                Response.Headers.Add("Token", token);
+                return Ok(user);
+            }
+            catch (InvalidArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (EntityNotFoundException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("register")]
         public async Task<ActionResult> RegisterUserAsync([FromBody]User user)
         {
-            var createdUserId = await _userService.RegisterUserAsync(user);
-            var token = GenerateToke(createdUserId);
-            Response.Headers.Add("Token", token);
-            return Ok(createdUserId);
-            // if (user == null)
-            //     return BadRequest(new { message = "Username or password is incorrect" });
-
-            // return Ok(user);
+            try
+            {
+                var createdUserId = await _userService.RegisterUserAsync(user);
+                var token = GenerateToke(createdUserId);
+                Response.Headers.Add("Token", token);
+                return Ok(new { message = $"user created with Id : {createdUserId}" });
+            }
+            catch (InvalidArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (ConflictingEntityException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
 
         private string GenerateToke(int userId)
         {
-            // authentication successful so generate jwt token
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor

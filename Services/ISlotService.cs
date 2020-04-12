@@ -9,7 +9,7 @@ namespace PostmanAssignment.Services
 {
     public interface ISlotService
     {
-        Task<Slot> CreateAsync(SlotCreateCommand slot);
+        Task<Slot> CreateAsync(Slot slot);
         Task<Slot> GetAsync(Guid id);
         Task<IEnumerable<Duration>> GetAvailableSlotDurationsAsync(SlotSearchQuery query);
     }
